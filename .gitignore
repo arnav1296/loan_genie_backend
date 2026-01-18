@@ -93,3 +93,5 @@ secrets/
 credentials/
 *.key
 *.pem
+
+.gitignore
