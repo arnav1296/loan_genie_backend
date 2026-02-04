@@ -22,8 +22,6 @@ class Customer(BaseModel):
     existing_loan_type: Optional[str] = None
     pre_approved_limit: float
     kyc_verified: bool = False
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
 class KYCVerificationRequest(BaseModel):
     phone: str = Field(..., pattern=r'^\d{10}$')

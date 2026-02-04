@@ -1,5 +1,5 @@
 from crewai import Task, Crew
-from agents.sales_task import chat
+from agents.task import chat
 
 
 chat()
