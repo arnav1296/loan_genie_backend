@@ -1,16 +1,10 @@
 from crewai import Agent
-from langchain_google_genai import ChatGoogleGenerativeAI
-import os
+from config import llm
 from tools.kyc_tools import (
     verify_phone, 
     verify_address, 
     complete_kyc, 
     get_customer_by_phone
-)
-
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    google_api_key=os.getenv("GEMINI_API_KEY")
 )
 
 verification_agent = Agent(

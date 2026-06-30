@@ -1,13 +1,7 @@
 from crewai import Agent
-from google import genai
-from langchain_google_genai import ChatGoogleGenerativeAI
-import os
+from config import llm
 from tools.offer_tools import get_all_loan_offers, get_eligible_offers, get_offer_details
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    google_api_key=os.getenv("GEMINI_API_KEY")
-)
 
 sales_agent = Agent(
     role="Sales Representative",

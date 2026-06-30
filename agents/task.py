@@ -1,6 +1,7 @@
 from crewai import Task, Crew
 from agents.sales_agent import sales_agent
 from agents.verification_agent import verification_agent
+from agents.underwriting_agent import underwriting_agent
 
 def chat():
     print("=== Loan Application System ===")
@@ -8,7 +9,7 @@ def chat():
 
     conversation_history = []
     current_agent = sales_agent  # Start with sales
-    stage = "verification"  # Track stage: sales -> verification -> approval
+    stage = "underwriting"  # Track stage: sales -> verification -> approval
 
     while True:
         customer_query = input("Customer: ")
@@ -66,7 +67,7 @@ Your job:
 2. Then verify their address
 3. If both are verified, complete KYC verification
 4. Guide them through any verification issues
-5. When KYC is complete, end your response with: [KYC_COMPLETE]
+
 
 Be professional and clear about what you need.""",
                 agent=verification_agent,
@@ -85,3 +86,60 @@ Be professional and clear about what you need.""",
             else:
                 conversation_history.append(f"Agent: {result}")
                 print(f"\nAgent: {result}\n")
+                
+                
+        elif stage == 'underwriting':
+            underwriting_task = Task(
+                description=f'''Previous conversation:
+{context}
+
+Customer's latest message: "{customer_query}"
+
+Your job:
+
+Extract the customer_id and requested loan_amount from the conversation or handoff summary.
+
+Use the check_loan_eligibility tool to determine the loan status.
+
+Based on the tool response:
+
+APPROVED → Congratulate the customer and clearly explain the approval details and next steps.
+
+REJECTED → Politely explain the reason (low credit score or loan amount too high).
+
+PENDING_SALARY_VERIFICATION → Request the customer to upload their latest salary slip for verification.
+
+If the customer uploads a salary slip:
+
+Extract the monthly_salary from the document.
+
+Use verify_salary_affordability to check whether the EMI is affordable.
+
+Approve or reject based on the affordability result.
+
+Clearly communicate the final decision with reasoning and next steps.''',
+                agent=underwriting_agent,
+                expected_output="A professional underwriting decision response"
+            )
+            
+            crew = Crew(
+                agents=[underwriting_agent],
+                tasks=[underwriting_task],
+                verbose=False
+            )
+
+            result = crew.kickoff()
+
+            conversation_history.append(f"Agent: {result}")
+            print(f"\nAgent: {result}\n")
+
+            # If approved or rejected → end application
+            if "APPROVED" in str(result) or "REJECTED" in str(result):
+                print("✓ Underwriting decision completed.\n")
+                break
+
+            # If salary verification needed → stay in underwriting stage
+            elif "PENDING_SALARY_VERIFICATION" in str(result):
+                print("Waiting for salary slip upload...\n")
+            
+            
